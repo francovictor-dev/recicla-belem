@@ -1,0 +1,46 @@
+<section mat-dialog-content>
+  <span class="title">Criar ponto</span>
+  <form [formGroup]="createPointForm" (ngSubmit)="submit()">
+    <div class="text-field">
+      <label for="city">Imagem</label>
+      <input type="file" #fileInput hidden (change)="onFileSelected($event)" />
+
+      <app-button class="full" variant="outline" type="button" (click)="fileInput.click()">
+        @if (!!fileImg) {
+          {{ fileImg.name }}
+        }
+        @if (!fileImg) {
+          Selecionar arquivo
+        }
+      </app-button>
+    </div>
+
+    <div class="text-field">
+      <label for="city">Tipo de coletores</label>
+      <div class="checkboxex">
+        @for (item of data.collectors; track item.id) {
+          <label class="grid-item">
+            <input
+              type="checkbox"
+              [checked]="selectedIds.includes(item.id)"
+              (change)="toggleCollector(item.id)"
+            />
+
+            {{ item.name }}
+          </label>
+        }
+      </div>
+    </div>
+
+    <div class="text-field">
+      <label for="complement">Complemento</label>
+      <app-input formControlName="complement" label="Complement"></app-input>
+    </div>
+
+    <app-button class="full" variant="contained" type="submit">Confirmar</app-button>
+  </form>
+</section>
+
+<!-- <div mat-dialog-actions>
+  <button mat-button mat-dialog-close>Fechar</button>
+ </div>-->

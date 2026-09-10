@@ -1,0 +1,54 @@
+<section>
+  <div class="blur"></div>
+  <img ngSrc="/images/logo.png" alt="Logo" width="40" height="40" />
+  <h1>Recicla Belém</h1>
+  <app-card>
+    <div class="app-card-content">
+      <span class="title">Bem vindo(a)</span>
+      <span class="">Faça login para acessar recursos da plataforma</span>
+
+      <form [formGroup]="loginForm" (ngSubmit)="submit()">
+        <div class="text-field">
+          <label for="email">E-mail</label>
+          <app-input formControlName="email" label="Email" type="email"></app-input>
+          @if (loginForm.controls['email'].touched) {
+            @if (loginForm.controls['email'].errors?.['required']) {
+              <small> Email obrigatório </small>
+            }
+            @if (loginForm.controls['email'].errors?.['email']) {
+              <small> Email inválido </small>
+            }
+          }
+        </div>
+        <div class="text-field">
+          <label for="password">Senha</label>
+          <app-input formControlName="password" label="Senha" type="password"></app-input>
+          @if (loginForm.controls['password'].touched) {
+            @if (loginForm.controls['password'].errors?.['required']) {
+              <small> Senha obrigatória </small>
+            }
+            @if (loginForm.controls['password'].errors?.['minlength']) {
+              <small> Mínimo 8 caracteres </small>
+            }
+          }
+        </div>
+        <app-button type="submit" class="full" variant="contained">Login</app-button>
+      </form>
+
+      <div class="line-container">
+        <div class="line"></div>
+        <span>ou continue com</span>
+        <div class="line"></div>
+      </div>
+
+      <div style="width: 100%">
+        <app-button class="full" variant="outline">
+          <img src="/svgs/google.svg" alt="logo google" height="24" width="24" style="color: red" />
+          <span style="margin-left: 0.5rem">Google</span></app-button
+        >
+      </div>
+
+      <span>É novo? Faça o registro <a>aqui</a></span>
+    </div>
+  </app-card>
+</section>

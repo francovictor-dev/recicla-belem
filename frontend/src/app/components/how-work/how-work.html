@@ -1,0 +1,65 @@
+<section id="como-funciona">
+  <h1>Como funciona</h1>
+  <div class="grid-cards">
+    <app-card style="--card-bg-color: white">
+      <div class="card-content">
+        <div class="icon" style="background-color: #afe2b3">
+          <lucide-icon size="38" color="#00210A" [img]="icons.MapPin"></lucide-icon>
+        </div>
+
+        <div class="card-info">
+          <h2>Ative sua localização</h2>
+          <span>
+            Para encontrar os pontos de coleta mais próximos, ative a localização do seu dispositivo
+            e explore o mapa interativo.
+          </span>
+        </div>
+      </div>
+    </app-card>
+    <app-card style="--card-bg-color: #e6e9e7">
+      <div class="card-content">
+        <div class="icon" style="background-color: #386641">
+          <lucide-icon size="38" color="#AFE2B3" [img]="icons.Map"></lucide-icon>
+        </div>
+
+        <div class="card-info">
+          <h2>Navegue</h2>
+          <span> Explore o mapa para encontrar os pontos de coleta mais próximos. </span>
+        </div>
+      </div>
+    </app-card>
+    <app-card style="--card-bg-color: #e6e9e7">
+      <div class="card-content">
+        <div class="card-content">
+          <div class="icon" style="background-color: #386641">
+            <lucide-icon size="38" color="#AFE2B3" [img]="icons.Map"></lucide-icon>
+          </div>
+
+          <div class="card-info">
+            <h2>Veja detalhes</h2>
+            <span>Clique no ponto e veja todos os materiais recicláveis estão </span>
+          </div>
+        </div>
+      </div>
+    </app-card>
+    <app-card style="--card-bg-color: var(--primary-color-600)">
+      <div class="card-content">
+        <div class="card-content">
+          <div class="icon">
+            <lucide-icon size="38" color="#00210A" [img]="icons.Map"></lucide-icon>
+          </div>
+
+          <div class="card-info">
+            <h2>Contribua com a comunidade</h2>
+            <span>
+              Crie sua conta e ajude a expandir o mapeamento de pontos de coletores de materiais
+              recicláveis em Belém. Você também pode denunciar locais com problemas e colaborar para
+              manter as informações sempre atualizadas.</span
+            >
+            <app-button variant="outline" style="margin-top: 1.5rem">Criar conta</app-button>
+          </div>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</section>

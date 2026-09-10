@@ -1,0 +1,19 @@
+<header id="">
+  <div>
+    <img ngSrc="/images/logo.png" alt="Logo" width="40" height="40" />
+    <p class="project-name">Recicla Belém</p>
+  </div>
+  <article class="menu">
+    <a class="active" href="/#">Home</a>
+    <a class="active" href="/#como-funciona">Como funciona</a>
+    <a class="active" href="/mapa">Mapa</a>
+  </article>
+  <div class="auth">
+    @if (authStore.isAuth()) {
+      <app-button variant="outline" (click)="logout()"> Logout </app-button>
+    }
+    @if (!authStore.isAuth()) {
+      <a href="/autenticacao/login">Login</a>
+    }
+  </div>
+</header>
