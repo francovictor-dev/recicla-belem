@@ -157,6 +157,32 @@ namespace backend.Migrations
                     b.ToTable("Collectors");
                 });
 
+            modelBuilder.Entity("Backend.Models.Image", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CollectionPointId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CollectionPointId");
+
+                    b.ToTable("Images");
+                });
+
             modelBuilder.Entity("Backend.Models.Profile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -213,6 +239,40 @@ namespace backend.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("Backend.Models.Report", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CollectionPointId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReportType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CollectionPointId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reports");
+                });
+
             modelBuilder.Entity("Backend.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -261,7 +321,7 @@ namespace backend.Migrations
             modelBuilder.Entity("Backend.Models.CollectionPointCollector", b =>
                 {
                     b.HasOne("Backend.Models.CollectionPoint", "CollectionPoint")
-                        .WithMany()
+                        .WithMany("CollectionPointCollectors")
                         .HasForeignKey("CollectionPointId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -275,6 +335,17 @@ namespace backend.Migrations
                     b.Navigation("CollectionPoint");
 
                     b.Navigation("Collector");
+                });
+
+            modelBuilder.Entity("Backend.Models.Image", b =>
+                {
+                    b.HasOne("Backend.Models.CollectionPoint", "CollectionPoint")
+                        .WithMany("Images")
+                        .HasForeignKey("CollectionPointId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CollectionPoint");
                 });
 
             modelBuilder.Entity("Backend.Models.Profile", b =>
@@ -297,6 +368,32 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Backend.Models.Report", b =>
+                {
+                    b.HasOne("Backend.Models.CollectionPoint", "CollectionPoint")
+                        .WithMany()
+                        .HasForeignKey("CollectionPointId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CollectionPoint");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Backend.Models.CollectionPoint", b =>
+                {
+                    b.Navigation("CollectionPointCollectors");
+
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("Backend.Models.User", b =>

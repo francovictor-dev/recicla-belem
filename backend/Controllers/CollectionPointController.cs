@@ -13,11 +13,11 @@ public class CollectionPointController(ICollectionPointService collectionPointSe
 
   [HttpPost]
   [Authorize]
-  public async Task<IActionResult> Create(CreateCollectionPointDto dto)
+  public async Task<IActionResult> Create(CreateCollectionPointDto dto, [FromQuery] string? include = null)
   {
     try
     {
-      var result = await _collectionPointService.CreateAsync(dto);
+      var result = await _collectionPointService.CreateAsync(dto, ParseIncludes(include));
       return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
     catch (KeyNotFoundException ex)

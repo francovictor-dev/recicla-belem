@@ -9,14 +9,17 @@ namespace Backend.Services;
 public class CollectionPointService : ICollectionPointService
 {
   private readonly AppDbContext _context;
+  private readonly IImageService _imageService;
 
-  public CollectionPointService(AppDbContext context)
+  public CollectionPointService(AppDbContext context, IImageService imageService)
   {
     _context = context;
+    _imageService = imageService;
   }
 
-  public async Task<CollectionPointResponseDto> CreateAsync(CreateCollectionPointDto dto)
+  public async Task<CollectionPointResponseDto> CreateAsync(CreateCollectionPointDto dto, IEnumerable<string> include)
   {
+    var includes = include.ToHashSet(StringComparer.OrdinalIgnoreCase);
     var collectorIds = dto.CollectorIds.Distinct().ToList();
     var collectors = await _context.Collectors
       .Where(collector => collectorIds.Contains(collector.Id))
@@ -74,7 +77,15 @@ public class CollectionPointService : ICollectionPointService
 
     await _context.SaveChangesAsync();
 
-    return MapToDto(collectionPoint, new[] { "address", "collector" });
+    foreach (var image in dto.Images ?? Enumerable.Empty<CreateCollectionPointImageDto>())
+      await _imageService.CreateAsync(new CreateImageDto(image.StoragePath, collectionPoint.Id));
+
+    if (includes.Contains("image") && (dto.Images?.Any() ?? false))
+      collectionPoint.Images = await _context.Images
+        .Where(image => image.CollectionPointId == collectionPoint.Id)
+        .ToListAsync();
+
+    return MapToDto(collectionPoint, includes);
   }
 
   public async Task<CollectionPointResponseDto?> GetByIdAsync(Guid id, IEnumerable<string> include)
@@ -87,6 +98,9 @@ public class CollectionPointService : ICollectionPointService
 
     if (includes.Contains("collector"))
       query = query.Include(cp => cp.CollectionPointCollectors).ThenInclude(cpc => cpc.Collector);
+
+    if (includes.Contains("image"))
+      query = query.Include(cp => cp.Images);
 
     var collectionPoint = await query.FirstOrDefaultAsync(cp => cp.Id == id);
 
@@ -103,6 +117,8 @@ public class CollectionPointService : ICollectionPointService
       query = query.Include(cp => cp.Address);
     if (includes.Contains("collector"))
       query = query.Include(cp => cp.CollectionPointCollectors).ThenInclude(cpc => cpc.Collector);
+    if (includes.Contains("image"))
+      query = query.Include(cp => cp.Images);
 
     var collectionPoint = await query.FirstOrDefaultAsync(cp => cp.Id == id)
         ?? throw new KeyNotFoundException("Ponto de coleta não encontrado.");
@@ -131,6 +147,8 @@ public class CollectionPointService : ICollectionPointService
       query = query.Include(cp => cp.Address);
     if (includes.Contains("collector"))
       query = query.Include(cp => cp.CollectionPointCollectors).ThenInclude(cpc => cpc.Collector);
+    if (includes.Contains("image"))
+      query = query.Include(cp => cp.Images);
 
     var collectionPoints = await query.ToListAsync();
     return collectionPoints.Select(v => MapToDto(v, includes));
@@ -157,6 +175,7 @@ public class CollectionPointService : ICollectionPointService
         collectionPoint.CreatedAt,
         collectionPoint.UpdatedAt,
         !includes.Contains("address") ? null : new AddressResponseDto(collectionPoint.Address.Id, collectionPoint.Address.Road, collectionPoint.Address.Number, collectionPoint.Address.Complement, collectionPoint.Address.Neighborhood, collectionPoint.Address.City, collectionPoint.Address.State, collectionPoint.Address.ZipCode, collectionPoint.Address.Lat, collectionPoint.Address.Lng, collectionPoint.Address.CreatedAt, collectionPoint.Address.UpdatedAt),
-        !includes.Contains("collector") ? null : collectionPoint.CollectionPointCollectors.Select(cpc => new CollectorResponseDto(cpc.Collector.Id, cpc.Collector.Name, cpc.Collector.Description, cpc.Collector.Color, cpc.Collector.CreatedAt, cpc.Collector.UpdatedAt)));
+        !includes.Contains("collector") ? null : collectionPoint.CollectionPointCollectors.Select(cpc => new CollectorResponseDto(cpc.Collector.Id, cpc.Collector.Name, cpc.Collector.Description, cpc.Collector.Color, cpc.Collector.CreatedAt, cpc.Collector.UpdatedAt)),
+        !includes.Contains("image") ? null : collectionPoint.Images.Select(image => new ImageResponseDto(image.Id, image.StoragePath, image.CollectionPointId, image.CreatedAt, image.UpdatedAt)));
   }
 }

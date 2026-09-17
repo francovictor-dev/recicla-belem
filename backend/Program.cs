@@ -25,23 +25,25 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICollectorService, CollectorService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
-builder.Services.AddScoped<ICollectionPointService, CollectionPointService >();
+builder.Services.AddScoped<ICollectionPointService, CollectionPointService>();
 builder.Services.AddScoped<ICollectionPointCollectorService, CollectionPointCollectorService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped(typeof(OwnershipFilter<>));
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Digite: Bearer {seu token}"
-    });
+  options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+  {
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    Scheme = "Bearer",
+    BearerFormat = "JWT",
+    In = ParameterLocation.Header,
+    Description = "Digite: Bearer {seu token}"
+  });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+  options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -63,8 +65,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -90,14 +92,14 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

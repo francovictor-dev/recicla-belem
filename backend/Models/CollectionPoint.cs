@@ -8,6 +8,7 @@ public class CollectionPoint
   public Guid AddressId { get; set; }
   public Address Address { get; set; } = null!;
   public ICollection<CollectionPointCollector> CollectionPointCollectors { get; set; } = new List<CollectionPointCollector>();
+  public ICollection<Image> Images { get; set; } = new List<Image>();
   public CollectionPointStatus Status { get; set; } = CollectionPointStatus.Pending;
   public DateTimeOffset CreatedAt { get; set; }
   public DateTimeOffset UpdatedAt { get; set; }
