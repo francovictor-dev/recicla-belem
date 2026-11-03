@@ -13,7 +13,7 @@ export class CollectorService {
   getCollectors(): Observable<Collector[]> {
     if (!this.collectors$) {
       this.collectors$ = this.http
-        .get<Collector[]>(`${environment.apiUrl}/collectors`)
+        .get<Collector[]>(`${environment.apiUrl}/api/Collector`)
         .pipe(shareReplay(1));
     }
 

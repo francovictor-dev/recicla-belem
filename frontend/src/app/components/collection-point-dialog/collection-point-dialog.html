@@ -1,0 +1,42 @@
+<header>
+  <h2 mat-dialog-title>{{ point.address?.road || 'Ponto de coleta' }}</h2>
+  <button class="close-button" type="button" mat-dialog-close aria-label="Fechar detalhes do ponto">×</button>
+</header>
+<mat-dialog-content>
+  <section class="carousel" aria-label="Imagens do ponto de coleta" aria-roledescription="carrossel">
+    @if (images.length) {
+      @if (!imageFailed()) {
+        <img class="point-image" [src]="images[index()].storagePath" [alt]="'Imagem ' + (index() + 1) + ' do ponto de coleta'" (error)="imageFailed.set(true)" />
+      } @else {
+        <div class="empty-image" role="status">Não foi possível carregar esta imagem.</div>
+      }
+      @if (images.length > 1) {
+        <button class="carousel-arrow previous" type="button" aria-label="Imagem anterior" (click)="select(index() - 1)">‹</button>
+        <button class="carousel-arrow next" type="button" aria-label="Próxima imagem" (click)="select(index() + 1)">›</button>
+      }
+      <span class="image-count" aria-live="polite">{{ index() + 1 }} / {{ images.length }}</span>
+    } @else {
+      <div class="empty-image">Este ponto ainda não possui imagens.</div>
+    }
+  </section>
+  @if (images.length > 1) {
+    <div class="image-selectors" aria-label="Selecionar imagem">
+      @for (image of images; track image.id; let i = $index) {
+        <button type="button" [class.active]="index() === i" [attr.aria-label]="'Mostrar imagem ' + (i + 1)" [attr.aria-pressed]="index() === i" (click)="select(i)"></button>
+      }
+    </div>
+  }
+  <section class="collectors" aria-labelledby="point-collectors-title">
+    <h3 id="point-collectors-title">Tipos de coletores</h3>
+    <div class="collector-list">
+      @for (collector of point.collectors; track collector.id) {
+        <span class="collector-chip"><span class="collector-color" [style.background-color]="collector.color" aria-hidden="true"></span>{{ collector.name }}</span>
+      } @empty {
+        <p>Nenhum tipo de coletor informado.</p>
+      }
+    </div>
+  </section>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button class="report-button" type="button" (click)="openReport()"><lucide-icon [img]="reportIcon" size="18" aria-hidden="true" />Denunciar</button>
+</mat-dialog-actions>

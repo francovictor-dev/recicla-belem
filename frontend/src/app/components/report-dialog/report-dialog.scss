@@ -1,0 +1,14 @@
+:host { display: block; background: var(--color-white); color: var(--color-text); padding: 0.5rem; }
+h2 { color: var(--color-primary-600); font-family: inherit; }
+mat-dialog-content { font: inherit; }
+fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.65rem; }
+label { font-weight: 700; }
+select, textarea { box-sizing: border-box; width: 100%; border: 1px solid #d1d5db; border-radius: 12px; padding: 0.8rem; font: inherit; color: var(--color-text); background: var(--color-white); }
+textarea { resize: vertical; min-height: 120px; }
+small { color: var(--color-danger); }
+mat-dialog-actions { gap: 0.75rem; padding-bottom: 1rem; }
+button { border-radius: 999px; padding: 0.75rem 1.5rem; font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--color-primary-600); }
+.cancel { color: var(--color-primary-600); background: white; }
+.confirm { color: white; background: var(--color-primary-600); }
+button:disabled { opacity: 0.6; cursor: wait; }
+select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--color-primary-600); outline-offset: 2px; }

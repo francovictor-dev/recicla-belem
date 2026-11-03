@@ -41,14 +41,9 @@
         <div class="line"></div>
       </div>
 
-      <div style="width: 100%">
-        <app-button class="full" variant="outline">
-          <img src="/svgs/google.svg" alt="logo google" height="24" width="24" style="color: red" />
-          <span style="margin-left: 0.5rem">Google</span></app-button
-        >
-      </div>
+      <app-google-sign-in />
 
-      <span>É novo? Faça o registro <a>aqui</a></span>
+      <span>É novo? Faça o registro <button type="button" class="register-link" (click)="openRegister()">aqui</button></span>
     </div>
   </app-card>
 </section>

@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
   }
 
+  public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
   public DbSet<User> Users => Set<User>();
   public DbSet<Profile> Profiles => Set<Profile>();
   public DbSet<Address> Addresses => Set<Address>();
@@ -20,6 +21,15 @@ public class AppDbContext : DbContext
   public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
+    modelBuilder.Entity<ExternalLogin>()
+        .ToTable("ExternalLogin");
+
+    modelBuilder.Entity<ExternalLogin>()
+        .HasOne(externalLogin => externalLogin.User)
+        .WithMany()
+        .HasForeignKey(externalLogin => externalLogin.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
+
     modelBuilder.Entity<RefreshToken>()
         .HasOne(rt => rt.User)
         .WithMany(u => u.RefreshTokens)

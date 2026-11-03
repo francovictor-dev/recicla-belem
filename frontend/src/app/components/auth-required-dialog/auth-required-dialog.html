@@ -1,0 +1,11 @@
+<div class="notice">
+  <span class="warning-icon" aria-hidden="true"><lucide-icon [img]="warningIcon" size="36" /></span>
+  <h2 mat-dialog-title>Autenticação necessária</h2>
+  <mat-dialog-content>
+    <p>É necessário estar autenticado para criar um novo ponto de coleta.</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="center">
+    <app-button variant="outline" type="button" [mat-dialog-close]="false">Cancelar</app-button>
+    <app-button variant="contained" type="button" [mat-dialog-close]="true">Fazer login</app-button>
+  </mat-dialog-actions>
+</div>

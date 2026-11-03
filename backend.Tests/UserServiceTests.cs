@@ -24,7 +24,7 @@ public class UserServiceTests
   public async Task CreateAsync_DeveCriarUsuario_QuandoDadosValidos()
   {
     await using var context = CreateContext();
-    var userService = new UserService(context);
+    var userService = new UserService(context, Moq.Mock.Of<IS3Service>());
     var dto = new CreateUserDto("emailteste@gmail.com", "Senha123");
 
     var result = await userService.CreateAsync(dto);
@@ -41,7 +41,7 @@ public class UserServiceTests
   public async Task CreateAsync_DeveLancarExcecao_QuandoEmailJaExiste()
   {
       await using var context = CreateContext();
-      var service = new UserService(context);
+      var service = new UserService(context, Moq.Mock.Of<IS3Service>());
       var dto = new CreateUserDto("duplicado@email.com", "Senha123");
 
       await service.CreateAsync(dto);
@@ -56,7 +56,7 @@ public class UserServiceTests
   public async Task GetById_DeveRetornarUsuario_QuandoExiste()
   {
       await using var context = CreateContext();
-      var service = new UserService(context);
+      var service = new UserService(context, Moq.Mock.Of<IS3Service>());
       var dto = new CreateUserDto("novousuario@email.com", "Senha123");
       var user = await service.CreateAsync(dto);
       var result = await service.GetByIdAsync(user.Id);
@@ -70,7 +70,7 @@ public class UserServiceTests
   public async Task GetByIdAsync_DeveRetornarNulo_QuandoNaoExiste()
   {
     await using var context = CreateContext();
-    var service = new UserService(context);
+    var service = new UserService(context, Moq.Mock.Of<IS3Service>());
 
     var result = await service.GetByIdAsync(Guid.NewGuid());
 
@@ -81,7 +81,7 @@ public class UserServiceTests
   public async Task GetAll_DeveRetornarUsuarios_QuandoExiste()
   {
       await using var context = CreateContext();
-      var service = new UserService(context);
+      var service = new UserService(context, Moq.Mock.Of<IS3Service>());
       
       var user1 = await service.CreateAsync(new CreateUserDto("novousuario1@email.com", "Senha123"));
       var user2 = await service.CreateAsync(new CreateUserDto("novousuario2@email.com", "Senha123"));
@@ -96,7 +96,7 @@ public class UserServiceTests
   public async Task Update_DeveRetornarUsuarios_QuandoEstaAtualizado()
   {
       await using var context = CreateContext();
-      var service = new UserService(context);
+      var service = new UserService(context, Moq.Mock.Of<IS3Service>());
       
       var user = await service.CreateAsync(new CreateUserDto("novousuario1@email.com", "Senha123"));
       var result = await service.UpdateAsync(user.Id, new UpdateUserDto("novousuario2@email.com", false, UserType.Google));
@@ -111,7 +111,7 @@ public class UserServiceTests
   public async Task Update_DeveRetornarException_QuandoNaoExiste()
   {
       await using var context = CreateContext();
-      var service = new UserService(context);
+      var service = new UserService(context, Moq.Mock.Of<IS3Service>());
       
       var act = async () => await service.UpdateAsync(Guid.NewGuid(), new UpdateUserDto("novousuario2@email.com", false, UserType.Google));
 
@@ -122,7 +122,7 @@ public class UserServiceTests
   public async Task Delete_DeveRemoverUsuario_QuandoExiste()
   {
     await using var context = CreateContext();
-    var service = new UserService(context);
+    var service = new UserService(context, Moq.Mock.Of<IS3Service>());
     var criado = await service.CreateAsync(new CreateUserDto("deletar@email.com", "Senha123"));
 
     await service.DeleteAsync(criado.Id);
@@ -135,7 +135,7 @@ public class UserServiceTests
   public async Task Delete_DeveLancarExcecao_QuandoNaoExiste()
   {
     await using var context = CreateContext();
-    var service = new UserService(context);
+    var service = new UserService(context, Moq.Mock.Of<IS3Service>());
 
     var act = async () => await service.DeleteAsync(Guid.NewGuid());
 

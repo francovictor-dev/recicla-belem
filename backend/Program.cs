@@ -1,4 +1,9 @@
+using Amazon;
+using Amazon.S3;
+using Backend.Configurations;
+using Microsoft.Extensions.Options;
 using Backend.Data;
+using Backend.Data.Seeders;
 using Backend.Filters;
 using Backend.Models;
 using Backend.Services;
@@ -12,24 +17,53 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 
-// ✅ Configuração de autenticação JWT
+// Configuração de autenticação JWT
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Add serviços
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
+builder.Services.AddCors(options => options.AddPolicy("FrontendDevelopment", policy =>
+    policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddOptions<S3Options>()
+    .Configure(options =>
+    {
+      options.Region = builder.Configuration["AWS_REGION"] ?? builder.Configuration["S3:Region"] ?? "";
+      options.Bucket = builder.Configuration["AWS_BUCKET"] ?? builder.Configuration["S3:Bucket"] ?? "";
+      options.PublicUrl = builder.Configuration["AWS_PUBLIC_URL"] ?? builder.Configuration["S3:PublicUrl"] ?? "";
+    })
+    .Validate(options => !string.IsNullOrWhiteSpace(options.Region), "Configure a região do S3.")
+    .Validate(options => !string.IsNullOrWhiteSpace(options.Bucket), "Configure o bucket do S3.")
+    .Validate(options => Uri.TryCreate(options.PublicUrl, UriKind.Absolute, out var url) && url.Scheme == Uri.UriSchemeHttps,
+        "Configure uma URL HTTPS para o S3.");
+builder.Services.AddSingleton<IAmazonS3>(provider =>
+    new AmazonS3Client(RegionEndpoint.GetBySystemName(provider.GetRequiredService<IOptions<S3Options>>().Value.Region)));
+builder.Services.AddScoped<IS3Service, S3Service>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IExternalLoginService, ExternalLoginService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
 builder.Services.AddScoped<ICollectorService, CollectorService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient("Nominatim", client =>
+{
+  client.BaseAddress = new Uri(builder.Configuration["Nominatim:BaseUrl"] ?? "https://nominatim.openstreetmap.org/");
+  client.DefaultRequestHeaders.UserAgent.ParseAdd("ReciclaBelem/1.0");
+  client.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddSingleton<INominatimService>(provider => new NominatimService(
+    provider.GetRequiredService<IHttpClientFactory>().CreateClient("Nominatim"),
+    provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
+    provider.GetRequiredService<ILogger<NominatimService>>()));
 builder.Services.AddScoped<ICollectionPointService, CollectionPointService>();
 builder.Services.AddScoped<ICollectionPointCollectorService, CollectionPointCollectorService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped(typeof(OwnershipFilter<>));
+builder.Services.AddScoped<CoordinateDebugFilter>();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -90,8 +124,22 @@ builder.Services.AddAuthentication(options =>
 // });
 builder.Services.AddAuthorization();
 
+Console.WriteLine(
+    $"AWS_ACCESS_KEY_ID preenchida: {!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID"))}");
+
+Console.WriteLine(
+    $"AWS_SECRET_ACCESS_KEY preenchida: {!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY"))}");
+
 var app = builder.Build();
 
+await using (var scope = app.Services.CreateAsyncScope())
+{
+  var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+  await CollectorSeeder.SeedAsync(context, logger: app.Logger);
+  await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);
+}
+
+if (app.Environment.IsDevelopment()) app.UseCors("FrontendDevelopment");
 app.UseAuthentication();
 app.UseAuthorization();
 

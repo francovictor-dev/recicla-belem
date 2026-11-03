@@ -1,43 +1,44 @@
 <section mat-dialog-content>
   <span class="title">Criar ponto</span>
   <form [formGroup]="createPointForm" (ngSubmit)="submit()">
+    <fieldset [disabled]="submitting()">
     <div class="text-field">
       <label for="city">Imagem</label>
-      <input type="file" #fileInput hidden (change)="onFileSelected($event)" />
+      <input type="file" accept="image/png" multiple #fileInput hidden (change)="onFileSelected($event)" />
 
       <app-button class="full" variant="outline" type="button" (click)="fileInput.click()">
-        @if (!!fileImg) {
-          {{ fileImg.name }}
-        }
-        @if (!fileImg) {
-          Selecionar arquivo
-        }
+        {{ images.length ? images.length + ' imagem(ns) selecionada(s)' : 'Selecionar imagens PNG' }}
       </app-button>
     </div>
 
     <div class="text-field">
-      <label for="city">Tipo de coletores</label>
-      <div class="checkboxex">
-        @for (item of data.collectors; track item.id) {
-          <label class="grid-item">
-            <input
-              type="checkbox"
-              [checked]="selectedIds.includes(item.id)"
-              (change)="toggleCollector(item.id)"
-            />
-
-            {{ item.name }}
-          </label>
-        }
-      </div>
-    </div>
-
-    <div class="text-field">
-      <label for="complement">Complemento</label>
-      <app-input formControlName="complement" label="Complement"></app-input>
+      <span id="collector-label">Tipo de coletores</span>
+      @if (loadingCollectors()) {
+        <small role="status">Carregando coletores…</small>
+      } @else if (collectorsError()) {
+        <small role="alert">{{ collectorsError() }}</small>
+        <app-button variant="outline" type="button" (click)="loadCollectors()">Tentar novamente</app-button>
+      } @else {
+        <div class="collector-chips" role="group" aria-labelledby="collector-label">
+          @for (item of collectors(); track item.id) {
+            <button type="button" class="collector-chip"
+              [class.selected]="selectedIds.includes(item.id)"
+              [attr.aria-pressed]="selectedIds.includes(item.id)"
+              (click)="toggleCollector(item.id)">
+              <span class="collector-color" [style.background-color]="item.color" aria-hidden="true"></span>
+              {{ item.name }}
+              @if (selectedIds.includes(item.id)) { <span aria-hidden="true">✓</span> }
+            </button>
+          } @empty {
+            <small>Nenhum coletor cadastrado.</small>
+          }
+        </div>
+      }
     </div>
 
     <app-button class="full" variant="contained" type="submit">Confirmar</app-button>
+    </fieldset>
+    @if (submitting()) { <app-loading /> }
   </form>
 </section>
 

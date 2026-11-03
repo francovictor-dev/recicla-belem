@@ -1,1 +1,8 @@
-<router-outlet></router-outlet>
+<div class="page-content" [attr.inert]="httpLoading.active() ? '' : null" [attr.aria-busy]="httpLoading.active()">
+  <router-outlet></router-outlet>
+</div>
+@if (httpLoading.active()) {
+  <div class="request-overlay">
+    <div class="request-loading"><app-loading /></div>
+  </div>
+}

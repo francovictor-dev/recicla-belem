@@ -31,6 +31,44 @@ public class UserController : ControllerBase
     }
   }
 
+  [HttpPost("default/json")]
+  [Consumes("application/json")]
+  public async Task<IActionResult> CreateDefault(CreateDefaultUserDto dto)
+  {
+    try
+    {
+      var result = await _userService.CreateDefaultAsync(dto.User, dto.Profile, dto.ExternalLogin);
+      return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
+    catch (ArgumentException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Conflict(new { message = ex.Message });
+    }
+  }
+
+  [HttpPost("default")]
+  [Consumes("multipart/form-data")]
+  public async Task<IActionResult> CreateDefaultWithImage([FromForm] CreateDefaultUserFormDto dto)
+  {
+    try
+    {
+      var result = await _userService.CreateDefaultAsync(dto.User, dto.Profile, dto.ExternalLogin, dto.Image);
+      return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
+    catch (ArgumentException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Conflict(new { message = ex.Message });
+    }
+  }
+
   [HttpGet("{id}")]
   public async Task<IActionResult> GetById(Guid id)
   {

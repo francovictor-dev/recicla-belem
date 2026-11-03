@@ -10,10 +10,18 @@
   </article>
   <div class="auth">
     @if (authStore.isAuth()) {
-      <app-button variant="outline" (click)="logout()"> Logout </app-button>
+      <button class="profile-button" type="button" [matMenuTriggerFor]="profileMenu" aria-label="Abrir menu da conta">
+        @if (authStore.user()?.profileImageUrl && !imageFailed()) {
+          <img [src]="authStore.user()?.profileImageUrl" alt="" class="avatar" (error)="imageFailed.set(true)" />
+        }
+        <span>{{ authStore.user()?.name || authStore.user()?.email }}</span>
+      </button>
+      <mat-menu #profileMenu="matMenu">
+        <button mat-menu-item (click)="logout()">Sair</button>
+      </mat-menu>
     }
     @if (!authStore.isAuth()) {
-      <a href="/autenticacao/login">Login</a>
+      <a routerLink="/autenticacao/login">Login</a>
     }
   </div>
 </header>

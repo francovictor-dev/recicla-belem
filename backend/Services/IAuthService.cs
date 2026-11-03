@@ -5,6 +5,7 @@ namespace Backend.Services;
 
 public interface IAuthService
 {
+    Task<AuthResponseDto> GoogleLoginAsync(GoogleLoginDto dto);
     Task<AuthResponseDto> LoginAsync(LoginDto dto);
     Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
 }

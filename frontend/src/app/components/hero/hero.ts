@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { Button } from '../button/button';
 
 @Component({
@@ -7,4 +8,10 @@ import { Button } from '../button/button';
   templateUrl: './hero.html',
   styleUrl: './hero.scss',
 })
-export class Hero {}
+export class Hero {
+  private readonly router = inject(Router);
+
+  openMap(): void {
+    void this.router.navigate(['/mapa']);
+  }
+}

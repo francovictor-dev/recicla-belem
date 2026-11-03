@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Backend.Dtos;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,14 +12,26 @@ public class CollectionPointController(ICollectionPointService collectionPointSe
 {
   private readonly ICollectionPointService _collectionPointService = collectionPointService;
 
+  [ServiceFilter(typeof(CoordinateDebugFilter))]
   [HttpPost]
+  [Consumes("multipart/form-data")]
   [Authorize]
-  public async Task<IActionResult> Create(CreateCollectionPointDto dto, [FromQuery] string? include = null)
+  public async Task<IActionResult> Create([FromForm] CreateCollectionPointDto dto, [FromQuery] string? include = null)
   {
     try
     {
+      Console.Write($"Creating collection point with Lat: {dto.Lat}, Lng: {dto.Lng}, CollectorIds: {string.Join(", ", dto.CollectorIds)}");
+      Console.Write($"Creating collection point with Lat: {dto.Lat}, Lng: {dto.Lng}, CollectorIds: {string.Join(", ", dto.CollectorIds)}");
+      Console.Write($"Creating collection point with Lat: {dto.Lat}, Lng: {dto.Lng}, CollectorIds: {string.Join(", ", dto.CollectorIds)}");
+      Console.Write($"Creating collection point with Lat: {dto.Lat}, Lng: {dto.Lng}, CollectorIds: {string.Join(", ", dto.CollectorIds)}");
+
+      Console.Write($"Creating collection point with Lat: {dto.Lat}, Lng: {dto.Lng}, CollectorIds: {string.Join(", ", dto.CollectorIds)}");
       var result = await _collectionPointService.CreateAsync(dto, ParseIncludes(include));
       return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
+    catch (ArgumentException ex)
+    {
+      return BadRequest(new { message = ex.Message });
     }
     catch (KeyNotFoundException ex)
     {

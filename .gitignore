@@ -1,0 +1,78 @@
+
+# ==========================================
+# .NET / ASP.NET Core
+# ==========================================
+**/bin/
+**/obj/
+.vs/
+.idea/
+*.user
+*.suo
+*.rsuser
+
+# Testes e cobertura
+**/TestResults/
+coverage/
+**/coverage/
+*.coverage
+*.coveragexml
+
+# ==========================================
+# Angular / Node.js
+# ==========================================
+**/node_modules/
+**/dist/
+**/.angular/
+**/.cache/
+**/coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# ==========================================
+# Variáveis de ambiente e segredos
+# ==========================================
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Configurações locais do .NET
+**/appsettings.Local.json
+**/appsettings.*.local.json
+
+# Arquivos de certificados e chaves
+*.pfx
+*.p12
+*.key
+*.pem
+
+# ==========================================
+# IDE / Sistema operacional
+# ==========================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# ==========================================
+# Docker
+# ==========================================
+docker-compose.override.yml
+
+# Dados persistidos do SQL Server
+/docker/sqlserver/data/
+
+# ==========================================
+# Arquivos temporários
+# ==========================================
+tmp/
+temp/
+*.tmp

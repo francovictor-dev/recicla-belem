@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Denunciar ponto de coleta</h2>
+<form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="submitting()">
+  <mat-dialog-content>
+    <fieldset [disabled]="submitting()">
+      <label for="report-type">Tipo de denúncia</label>
+      <select id="report-type" formControlName="reportType" aria-describedby="report-type-error">
+        <option [ngValue]="null" disabled>Selecione o tipo</option>
+        @for (type of types; track type.value) { <option [ngValue]="type.value">{{ type.label }}</option> }
+      </select>
+      @if (form.controls.reportType.touched && form.controls.reportType.invalid) { <small id="report-type-error">Selecione um tipo de denúncia.</small> }
+      <label for="report-message">Descrição</label>
+      <textarea id="report-message" formControlName="message" rows="5" placeholder="Descreva o problema encontrado" aria-describedby="report-message-error"></textarea>
+      @if (form.controls.message.touched && form.controls.message.invalid) { <small id="report-message-error">Descreva o problema para enviar a denúncia.</small> }
+    </fieldset>
+    @if (submitting()) { <app-loading /> }
+  </mat-dialog-content>
+  <mat-dialog-actions align="center">
+    <button class="cancel" type="button" mat-dialog-close [disabled]="submitting()">Cancelar</button>
+    <button class="confirm" type="submit" [disabled]="submitting()">Confirmar</button>
+  </mat-dialog-actions>
+</form>

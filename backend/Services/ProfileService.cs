@@ -29,6 +29,7 @@ public class ProfileService : IProfileService
         {
             Id = Guid.NewGuid(),
             Name = dto.Name,
+            PhotoUrl = dto.PhotoUrl,
             UserId = userId
         };
 
@@ -65,5 +66,5 @@ public class ProfileService : IProfileService
     }
 
     private static ProfileResponseDto MapToDto(Profile profile)
-        => new(profile.Id, profile.Name, profile.UserId);
+        => new(profile.Id, profile.Name, profile.UserId, profile.PhotoUrl);
 }

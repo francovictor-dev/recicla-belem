@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/fv/Documentos/GitHub/recicla-belem/backend/backend.csproj": {}
+    "/home/fvrss/Documentos/GitHub/recicla-belem/backend/backend.csproj": {}
   },
   "projects": {
-    "/home/fv/Documentos/GitHub/recicla-belem/backend/backend.csproj": {
+    "/home/fvrss/Documentos/GitHub/recicla-belem/backend/backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/fv/Documentos/GitHub/recicla-belem/backend/backend.csproj",
+        "projectUniqueName": "/home/fvrss/Documentos/GitHub/recicla-belem/backend/backend.csproj",
         "projectName": "backend",
-        "projectPath": "/home/fv/Documentos/GitHub/recicla-belem/backend/backend.csproj",
-        "packagesPath": "/home/fv/.nuget/packages/",
-        "outputPath": "/home/fv/Documentos/GitHub/recicla-belem/backend/obj/",
+        "projectPath": "/home/fvrss/Documentos/GitHub/recicla-belem/backend/backend.csproj",
+        "packagesPath": "/home/fvrss/.nuget/packages/",
+        "outputPath": "/home/fvrss/Documentos/GitHub/recicla-belem/backend/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/fv/.nuget/NuGet/NuGet.Config"
+          "/home/fvrss/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -38,9 +38,17 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "AWSSDK.S3": {
+              "target": "Package",
+              "version": "[4.0.104.6, )"
+            },
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.2.0, )"
+            },
+            "Google.Apis.Auth": {
+              "target": "Package",
+              "version": "[1.77.0, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
@@ -92,7 +100,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.130/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.132/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

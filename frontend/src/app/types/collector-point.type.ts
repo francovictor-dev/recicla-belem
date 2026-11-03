@@ -12,5 +12,5 @@ type CollectorPoint = {
 
 type CreateCollectorPointDTO = Pick<CollectorPoint, 'is_active' | 'status'> & {
   address: CreateAddressDTO;
-  collectors: number[]; // IDs dos coletores
+  collectors: string[]; // IDs dos coletores
 };

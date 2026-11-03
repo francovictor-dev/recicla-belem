@@ -15,9 +15,11 @@ public class ReportController(IReportService reportService) : ControllerBase
   [Authorize]
   public async Task<IActionResult> Create(CreateReportDto dto)
   {
+    var subject = User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    if (!Guid.TryParse(subject, out var userId)) return Unauthorized();
     try
     {
-      var result = await _reportService.CreateAsync(dto);
+      var result = await _reportService.CreateAsync(dto with { UserId = userId });
       return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
     catch (KeyNotFoundException ex)

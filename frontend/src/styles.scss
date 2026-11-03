@@ -32,3 +32,31 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
 }
+
+// Keep Material overlays above the header and map layers.
+.cdk-overlay-container {
+  z-index: 10000;
+}
+
+// Snackbars stay above dialogs and menus in the shared overlay container.
+.cdk-global-overlay-wrapper:has(mat-snack-bar-container) {
+  z-index: 10001;
+}
+
+// Explicit tokens are required because the app does not load a Material theme.
+.mat-mdc-snack-bar-container {
+  --mat-snack-bar-container-color: var(--color-white);
+  --mat-snack-bar-supporting-text-color: var(--color-text);
+  --mat-snack-bar-button-color: var(--color-primary-600);
+  --mat-snack-bar-container-shape: 12px;
+}
+
+// Menu panels are rendered in the global overlay, outside the header.
+.mat-mdc-menu-panel {
+  --mat-menu-container-color: var(--color-white);
+  --mat-menu-item-label-text-color: var(--color-text);
+  --mat-menu-item-icon-color: var(--color-primary-600);
+  --mat-menu-item-hover-state-layer-color: var(--color-bg);
+  --mat-menu-item-focus-state-layer-color: var(--color-bg);
+  --mat-menu-container-shape: 12px;
+}

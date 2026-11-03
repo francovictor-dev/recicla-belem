@@ -1,3 +1,36 @@
 <div class="container">
   <div id="map"></div>
+  <div class="location-control">
+    @if (pointsError()) { <p role="alert">{{ pointsError() }}</p> }
+    @if (locationMessage()) {
+      <p role="status" aria-live="polite">{{ locationMessage() }}</p>
+    }
+    <button type="button" [matMenuTriggerFor]="collectorFilters" aria-label="Filtrar pontos por coletores">
+      <lucide-icon [img]="icons.ListFilter" size="20" />
+      Filtro @if (selectedCollectorIds().length) { <span>({{ selectedCollectorIds().length }})</span> }
+    </button>
+    <mat-menu #collectorFilters="matMenu">
+      @if (filtersLoading()) {
+        <button mat-menu-item disabled>Carregando coletores…</button>
+      } @else if (filtersError()) {
+        <button mat-menu-item (click)="$event.stopPropagation(); loadCollectors()">Tentar carregar filtros novamente</button>
+      } @else {
+        @for (collector of filterCollectors(); track collector.id) {
+          <button mat-menu-item role="menuitemcheckbox" [attr.aria-checked]="selectedCollectorIds().includes(collector.id)"
+            (click)="$event.stopPropagation(); toggleCollectorFilter(collector.id)">
+            <span aria-hidden="true">{{ selectedCollectorIds().includes(collector.id) ? '☑' : '☐' }}</span>
+            <span class="filter-color" [style.background-color]="collector.color" aria-hidden="true"></span>
+            {{ collector.name }}
+          </button>
+        } @empty {
+          <button mat-menu-item disabled>Nenhum coletor cadastrado</button>
+        }
+        <button mat-menu-item (click)="$event.stopPropagation(); clearCollectorFilters()" [disabled]="!selectedCollectorIds().length">Limpar filtros</button>
+      }
+    </mat-menu>
+    <button class="gps-button" type="button" (click)="requestLocation()" [disabled]="locating()"
+      [attr.aria-label]="locating() ? 'Obtendo localização' : 'Minha localização'" title="Minha localização">
+      <lucide-icon [img]="icons.LocateFixed" size="24" />
+    </button>
+  </div>
 </div>

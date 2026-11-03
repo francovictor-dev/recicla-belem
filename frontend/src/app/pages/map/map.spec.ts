@@ -1,22 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { Map } from './map';
+import { LeafletMap } from '../../components/leaflet-map/leaflet-map';
 
-import { Map } from '../map/map';
+@Component({ selector: 'app-leaflet-map', template: '' })
+class MapStub {}
 
 describe('Map', () => {
-  let component: Map;
-  let fixture: ComponentFixture<Map>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Map],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(Map);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('renderiza o mapa que solicita localização', async () => {
+    TestBed.configureTestingModule({ imports: [Map] }).overrideComponent(Map, { remove: { imports: [LeafletMap] }, add: { imports: [MapStub] } });
+    const fixture = TestBed.createComponent(Map); await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('app-leaflet-map')).toBeTruthy();
   });
 });

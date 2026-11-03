@@ -14,6 +14,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
+            services.AddScoped<Backend.Services.IS3Service>(_ => Moq.Mock.Of<Backend.Services.IS3Service>());
             // Remove a configuração real do AppDbContext (SQL Server, etc.)
             var descriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));

@@ -4,3 +4,5 @@ namespace Backend.Dtos;
 public record LoginDto(string Email, string Password);
 public record AuthResponseDto(string AccessToken, string RefreshToken, DateTimeOffset ExpiresAt);
 public record RefreshTokenRequestDto(string RefreshToken);
+
+public record GoogleLoginDto([System.ComponentModel.DataAnnotations.Required] string IdToken);

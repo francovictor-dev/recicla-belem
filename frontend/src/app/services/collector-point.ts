@@ -2,18 +2,30 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 
-@Injectable({
-  providedIn: 'root',
-})
+export type CollectionPointResult = {
+  id: string;
+  isActive: boolean;
+  status: number;
+  address: { road: string; lat: number; lng: number } | null;
+  collectors?: { id: string; name: string; color: string }[] | null;
+  images: { id: string; storagePath: string }[] | null;
+};
+
+@Injectable({ providedIn: 'root' })
 export class CollectorPointService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
+  private readonly url = `${environment.apiUrl}/api/CollectionPoint`;
 
-  createCollectorPoint(data: CreateCollectorPointDTO, image: File) {
-    const formData = new FormData();
-    formData.append('image', image);
+  getAll() {
+    return this.http.get<CollectionPointResult[]>(this.url, { params: { include: 'address,collector,image' } });
+  }
 
-    formData.append('data', JSON.stringify(data));
-
-    return this.http.post(`${environment.apiUrl}/collector-points`, formData);
+  createCollectorPoint(data: { lat: number; lng: number; collectorIds: string[] }, images: File[]) {
+    const body = new FormData();
+    body.set('Lat', String(data.lat));
+    body.set('Lng', String(data.lng));
+    data.collectorIds.forEach(id => body.append('CollectorIds', id));
+    images.forEach(image => body.append('Images', image));
+    return this.http.post<CollectionPointResult>(this.url, body, { params: { include: 'address,collector,image' } });
   }
 }
