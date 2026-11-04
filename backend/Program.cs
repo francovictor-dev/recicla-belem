@@ -132,8 +132,26 @@ Console.WriteLine(
 
 var app = builder.Build();
 
-await using (var scope = app.Services.CreateAsyncScope())
+/* await using (var scope = app.Services.CreateAsyncScope())
 {
+  var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+  await CollectorSeeder.SeedAsync(context, logger: app.Logger);
+  await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);
+} */
+
+if (args.Contains("seed"))
+{
+  using var scope = app.Services.CreateScope();
+
+  var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+  await CollectorSeeder.SeedAsync(context, logger: app.Logger);
+  await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);
+}
+
+if (app.Environment.IsDevelopment())
+{
+  using var scope = app.Services.CreateScope();
+
   var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
   await CollectorSeeder.SeedAsync(context, logger: app.Logger);
   await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);

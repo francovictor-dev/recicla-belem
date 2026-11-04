@@ -1,0 +1,12 @@
+
+**/bin/
+**/obj/
+.vs/
+.vscode/
+.git/
+.env
+.env.*
+*.user
+*.suo
+Dockerfile*
+README.md
