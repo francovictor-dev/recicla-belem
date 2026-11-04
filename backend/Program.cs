@@ -170,6 +170,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapControllers();
+
+// TEST
+app.MapGet("/health", () =>
+{
+  return Results.Ok(new
+  {
+    status = "healthy",
+    timestamp = DateTime.UtcNow
+  });
+}).AllowAnonymous();
+
 app.Run();
 
 public partial class Program { }
