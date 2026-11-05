@@ -94,8 +94,20 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
+  options.UseSqlServer(
+      builder.Configuration.GetConnectionString("DefaultConnection"),
+      sqlOptions => sqlOptions.EnableRetryOnFailure(
+          maxRetryCount: 10,
+          maxRetryDelay: TimeSpan.FromSeconds(15),
+          errorNumbersToAdd: null
+      )
+  )
+);
+
+// LOCAL
+/* builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection"))); */
 
 builder.Services.AddAuthentication(options =>
 {
