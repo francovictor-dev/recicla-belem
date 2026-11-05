@@ -25,8 +25,14 @@ var jwtAudience = builder.Configuration["Jwt:Audience"];
 // Add serviços
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
-builder.Services.AddCors(options => options.AddPolicy("FrontendDevelopment", policy =>
-    policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("FrontendDevelopment", policy =>
+    policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod());
+
+  options.AddPolicy("Frontend", policy =>
+    policy.WithOrigins("https://recicla-belem.vercel.app").AllowAnyHeader().AllowAnyMethod());
+});
 builder.Services.AddOptions<S3Options>()
     .Configure(options =>
     {
@@ -163,23 +169,26 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
   await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);
 }
 
-if (app.Environment.IsDevelopment())
-{
-  app.UseHttpsRedirection();
-}
+// Configuração dos middlewares
+app.UseRouting();
 
-if (app.Environment.IsDevelopment()) app.UseCors("FrontendDevelopment");
-app.UseAuthentication();
-app.UseAuthorization();
-
-// Configure the HTTP request pipeline.
+// only development environment should use swagger and https redirection, production should not use it because it is behind a reverse proxy that handles https redirection
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
   app.UseSwaggerUI();
+  app.UseHttpsRedirection();
+  app.UseCors("FrontendDevelopment");
+}
+else if (app.Environment.IsProduction())
+{
+  app.UseCors("Frontend");
 }
 
-app.UseHttpsRedirection();
+app.UseAuthentication();
+
+app.UseAuthorization();
+
 app.MapControllers();
 
 // TEST
