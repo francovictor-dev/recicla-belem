@@ -139,20 +139,14 @@ var app = builder.Build();
   await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);
 } */
 
-if (args.Contains("seed"))
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
   using var scope = app.Services.CreateScope();
 
   var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-  await CollectorSeeder.SeedAsync(context, logger: app.Logger);
-  await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);
-}
 
-if (app.Environment.IsDevelopment())
-{
-  using var scope = app.Services.CreateScope();
+  await context.Database.MigrateAsync();
 
-  var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
   await CollectorSeeder.SeedAsync(context, logger: app.Logger);
   await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);
 }
