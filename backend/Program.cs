@@ -163,6 +163,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
   await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);
 }
 
+if (app.Environment.IsDevelopment())
+{
+  app.UseHttpsRedirection();
+}
+
 if (app.Environment.IsDevelopment()) app.UseCors("FrontendDevelopment");
 app.UseAuthentication();
 app.UseAuthorization();
