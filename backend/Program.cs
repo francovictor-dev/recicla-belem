@@ -163,7 +163,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 
   var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-  await context.Database.MigrateAsync();
+  if (context.Database.IsRelational())
+    await context.Database.MigrateAsync();
 
   await CollectorSeeder.SeedAsync(context, logger: app.Logger);
   await AdminUserSeeder.SeedAsync(context, app.Configuration, logger: app.Logger);

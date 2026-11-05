@@ -33,61 +33,68 @@ public class UserService(AppDbContext context, IS3Service s3Service) : IUserServ
         throw new ArgumentException("O arquivo deve ser uma imagem PNG.");
     }
 
-    await using var transaction = await _context.Database.BeginTransactionAsync();
-    string? uploadedKey = null;
-    try
+    var strategy = _context.Database.CreateExecutionStrategy();
+    var firstAttempt = true;
+    return await strategy.ExecuteAsync(async () =>
     {
-      var user = await CreateUserAsync(dto, UserRole.Default);
-      var profile = new Profile
+      if (!firstAttempt) _context.ChangeTracker.Clear();
+      firstAttempt = false;
+      await using var transaction = await _context.Database.BeginTransactionAsync();
+      string? uploadedKey = null;
+      try
       {
-        Id = Guid.NewGuid(),
-        Name = profileDto.Name,
-        PhotoUrl = profileDto.PhotoUrl,
-        UserId = user.Id
-      };
-      _context.Profiles.Add(profile);
-
-      if (externalLoginDto is not null)
-      {
-        var now = DateTimeOffset.UtcNow;
-        _context.ExternalLogins.Add(new ExternalLogin
+        var user = await CreateUserAsync(dto, UserRole.Default);
+        var profile = new Profile
         {
           Id = Guid.NewGuid(),
-          Provider = externalLoginDto.Provider,
-          ProviderId = externalLoginDto.ProviderId,
-          UserId = user.Id,
-          CreatedAt = now,
-          UpdatedAt = now
-        });
-      }
-      await _context.SaveChangesAsync();
+          Name = profileDto.Name,
+          PhotoUrl = profileDto.PhotoUrl,
+          UserId = user.Id
+        };
+        _context.Profiles.Add(profile);
 
-      if (imageBytes is not null)
-      {
-        var key = $"users/{user.Id}/profile.png";
-        using var content = new MemoryStream(imageBytes);
-        profile.PhotoUrl = await s3Service.UploadAsync(content, key, "image/png");
-        uploadedKey = key;
+        if (externalLoginDto is not null)
+        {
+          var now = DateTimeOffset.UtcNow;
+          _context.ExternalLogins.Add(new ExternalLogin
+          {
+            Id = Guid.NewGuid(),
+            Provider = externalLoginDto.Provider,
+            ProviderId = externalLoginDto.ProviderId,
+            UserId = user.Id,
+            CreatedAt = now,
+            UpdatedAt = now
+          });
+        }
         await _context.SaveChangesAsync();
+
+        if (imageBytes is not null)
+        {
+          var key = $"users/{user.Id}/profile.png";
+          using var content = new MemoryStream(imageBytes);
+          profile.PhotoUrl = await s3Service.UploadAsync(content, key, "image/png");
+          uploadedKey = key;
+          await _context.SaveChangesAsync();
+        }
+        await transaction.CommitAsync();
+        return user;
       }
-      await transaction.CommitAsync();
-      return user;
-    }
-    catch (Exception error)
-    {
-      if (uploadedKey is not null)
+      catch (Exception error)
       {
-        try
+        if (uploadedKey is not null)
         {
-          await s3Service.DeleteAsync(uploadedKey);
+          try
+          {
+            await s3Service.DeleteAsync(uploadedKey);
+          }
+          catch (Exception cleanupError)
+          {
+            throw new AggregateException("Falha no cadastro e na remoção da imagem do S3.", error, cleanupError);
+          }
         }
-        catch (Exception cleanupError)
-        {
-          throw new AggregateException("Falha no cadastro e na remoção da imagem do S3.", error, cleanupError);
-        }
+        throw;
       }
-      throw;
-    }
+    });
   }
 
   private async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto, UserRole role)

@@ -36,58 +36,65 @@ public class CollectionPointService : ICollectionPointService
         throw new ArgumentException("Arquivo PNG inválido.");
     }
 
-    await using var transaction = await _context.Database.BeginTransactionAsync();
-    var uploaded = new List<string>();
-    try
+    var strategy = _context.Database.CreateExecutionStrategy();
+    var firstAttempt = true;
+    return await strategy.ExecuteAsync(async () =>
     {
-      var resolved = await _nominatim.ReverseAsync(dto.Lat, dto.Lng);
-      var collectorIds = dto.CollectorIds.Distinct().ToList();
-      var collectors = await _context.Collectors.Where(c => collectorIds.Contains(c.Id)).ToListAsync();
-      if (collectors.Count != collectorIds.Count) throw new KeyNotFoundException("Um ou mais coletores não foram encontrados.");
-      var now = DateTimeOffset.UtcNow;
-      var point = new CollectionPoint
+      if (!firstAttempt) _context.ChangeTracker.Clear();
+      firstAttempt = false;
+      await using var transaction = await _context.Database.BeginTransactionAsync();
+      var uploaded = new List<string>();
+      try
       {
-        Id = Guid.NewGuid(), IsActive = true, Status = CollectionPointStatus.Approved,
-        CreatedAt = now, UpdatedAt = now,
-        Address = new Address
+        var resolved = await _nominatim.ReverseAsync(dto.Lat, dto.Lng);
+        var collectorIds = dto.CollectorIds.Distinct().ToList();
+        var collectors = await _context.Collectors.Where(c => collectorIds.Contains(c.Id)).ToListAsync();
+        if (collectors.Count != collectorIds.Count) throw new KeyNotFoundException("Um ou mais coletores não foram encontrados.");
+        var now = DateTimeOffset.UtcNow;
+        var point = new CollectionPoint
         {
-          Id = Guid.NewGuid(), Road = resolved.Road, Number = resolved.Number, Complement = resolved.Complement,
-          Neighborhood = resolved.Neighborhood, City = resolved.City, State = resolved.State, ZipCode = resolved.ZipCode,
-          Lat = dto.Lat, Lng = dto.Lng, CreatedAt = now, UpdatedAt = now
+          Id = Guid.NewGuid(), IsActive = true, Status = CollectionPointStatus.Approved,
+          CreatedAt = now, UpdatedAt = now,
+          Address = new Address
+          {
+            Id = Guid.NewGuid(), Road = resolved.Road, Number = resolved.Number, Complement = resolved.Complement,
+            Neighborhood = resolved.Neighborhood, City = resolved.City, State = resolved.State, ZipCode = resolved.ZipCode,
+            Lat = dto.Lat, Lng = dto.Lng, CreatedAt = now, UpdatedAt = now
+          }
+        };
+        point.AddressId = point.Address.Id;
+        foreach (var collector in collectors)
+          point.CollectionPointCollectors.Add(new CollectionPointCollector
+          {
+            Id = Guid.NewGuid(), CollectionPoint = point, Collector = collector,
+            CollectionPointId = point.Id, CollectorId = collector.Id, CreatedAt = now, UpdatedAt = now
+          });
+        foreach (var file in dto.Images)
+        {
+          var imageId = Guid.NewGuid();
+          var key = $"images/{point.Id}/{imageId}.png";
+          await using var stream = file.OpenReadStream();
+          var path = await _s3.UploadAsync(stream, key, "image/png");
+          uploaded.Add(key);
+          point.Images.Add(new Image { Id = imageId, StoragePath = path, CollectionPointId = point.Id, CreatedAt = now, UpdatedAt = now });
         }
-      };
-      point.AddressId = point.Address.Id;
-      foreach (var collector in collectors)
-        point.CollectionPointCollectors.Add(new CollectionPointCollector
+        _context.CollectionPoints.Add(point);
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+        return MapToDto(point, include);
+      }
+      catch (Exception original)
+      {
+        var errors = new List<Exception> { original };
+        foreach (var key in uploaded)
         {
-          Id = Guid.NewGuid(), CollectionPoint = point, Collector = collector,
-          CollectionPointId = point.Id, CollectorId = collector.Id, CreatedAt = now, UpdatedAt = now
-        });
-      foreach (var file in dto.Images)
-      {
-        var imageId = Guid.NewGuid();
-        var key = $"images/{point.Id}/{imageId}.png";
-        await using var stream = file.OpenReadStream();
-        var path = await _s3.UploadAsync(stream, key, "image/png");
-        uploaded.Add(key);
-        point.Images.Add(new Image { Id = imageId, StoragePath = path, CollectionPointId = point.Id, CreatedAt = now, UpdatedAt = now });
+          try { await _s3.DeleteAsync(key); }
+          catch (Exception cleanupError) { errors.Add(cleanupError); }
+        }
+        if (errors.Count > 1) throw new AggregateException("Falha no cadastro e na remoção de imagens do S3.", errors);
+        throw;
       }
-      _context.CollectionPoints.Add(point);
-      await _context.SaveChangesAsync();
-      await transaction.CommitAsync();
-      return MapToDto(point, include);
-    }
-    catch (Exception original)
-    {
-      var errors = new List<Exception> { original };
-      foreach (var key in uploaded)
-      {
-        try { await _s3.DeleteAsync(key); }
-        catch (Exception cleanupError) { errors.Add(cleanupError); }
-      }
-      if (errors.Count > 1) throw new AggregateException("Falha no cadastro e na remoção de imagens do S3.", errors);
-      throw;
-    }
+    });
   }
 
   public async Task<CollectionPointResponseDto?> GetByIdAsync(Guid id, IEnumerable<string> include)
